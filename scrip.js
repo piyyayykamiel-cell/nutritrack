@@ -1,4 +1,5 @@
 // DATABASE CONTOH MAKANAN
+
 const foodDatabase = {
   "burger": {
     name: "Burger",
@@ -8,6 +9,7 @@ const foodDatabase = {
     carbs: 30,
     fat: 19
   },
+
   "cheeseburger": {
     name: "Cheeseburger",
     emoji: "🍔",
@@ -16,6 +18,7 @@ const foodDatabase = {
     carbs: 33,
     fat: 22
   },
+
   "nasi goreng": {
     name: "Nasi Goreng",
     emoji: "🍛",
@@ -24,6 +27,7 @@ const foodDatabase = {
     carbs: 45,
     fat: 14
   },
+
   "ayam goreng": {
     name: "Ayam Goreng",
     emoji: "🍗",
@@ -32,6 +36,7 @@ const foodDatabase = {
     carbs: 8,
     fat: 17
   },
+
   "mie goreng": {
     name: "Mie Goreng",
     emoji: "🍜",
@@ -40,6 +45,7 @@ const foodDatabase = {
     carbs: 50,
     fat: 16
   },
+
   "pizza": {
     name: "Pizza",
     emoji: "🍕",
@@ -48,6 +54,7 @@ const foodDatabase = {
     carbs: 36,
     fat: 10
   },
+
   "sate ayam": {
     name: "Sate Ayam",
     emoji: "🍢",
@@ -56,6 +63,7 @@ const foodDatabase = {
     carbs: 12,
     fat: 16
   },
+
   "soto ayam": {
     name: "Soto Ayam",
     emoji: "🍲",
@@ -64,6 +72,7 @@ const foodDatabase = {
     carbs: 22,
     fat: 10
   },
+
   "nasi putih": {
     name: "Nasi Putih",
     emoji: "🍚",
@@ -72,6 +81,7 @@ const foodDatabase = {
     carbs: 45,
     fat: 0
   },
+
   "pisang": {
     name: "Pisang",
     emoji: "🍌",
@@ -80,6 +90,7 @@ const foodDatabase = {
     carbs: 27,
     fat: 0
   },
+
   "apel": {
     name: "Apel",
     emoji: "🍎",
@@ -88,6 +99,7 @@ const foodDatabase = {
     carbs: 25,
     fat: 0
   },
+
   "salad": {
     name: "Salad",
     emoji: "🥗",
@@ -96,6 +108,7 @@ const foodDatabase = {
     carbs: 15,
     fat: 7
   },
+
   "tempe goreng": {
     name: "Tempe Goreng",
     emoji: "🍘",
@@ -107,35 +120,17 @@ const foodDatabase = {
 };
 
 
-// AMBIL ELEMEN HTML
-const $ = id => document.getElementById(id);
+// MENGAMBIL ELEMENT HTML
 
-const profileKey = "nutritrack_profile";
-let profile = loadProfile();
-let selectedImage = null;
-let currentResult = null;
+const $ = (id) => document.getElementById(id);
 
+let profile = {};
 
-// PENYIMPANAN PROFIL
-function loadProfile() {
-  try {
-    return JSON.parse(
-      localStorage.getItem(profileKey)
-    ) || {};
-  } catch {
-    return {};
-  }
-}
-
-function saveProfileData() {
-  localStorage.setItem(
-    profileKey,
-    JSON.stringify(profile)
-  );
-}
+let imageUrl = null;
 
 
 // NOTIFIKASI
+
 function showToast(message) {
   const toast = $("toast");
 
@@ -150,12 +145,22 @@ function showToast(message) {
 }
 
 
-// TAMPILKAN PROFIL
+// PROFIL PENGGUNA
+
+function loadProfile() {
+  try {
+    profile = JSON.parse(
+      localStorage.getItem("nutritrack_profile")
+    ) || {};
+  } catch {
+    profile = {};
+  }
+}
+
 function displayProfile() {
   const name = profile.name || "Pengguna";
 
-  $("displayName").textContent =
-    `Halo, ${name}! 👋`;
+  $("displayName").textContent = "Halo, " + name + "! 👋";
 
   $("avatar").textContent =
     name.charAt(0).toUpperCase();
@@ -174,7 +179,8 @@ function displayProfile() {
 }
 
 
-// BUKA MODAL PROFIL
+// BUKA FORM PROFIL
+
 function openProfile() {
   $("name").value = profile.name || "";
   $("age").value = profile.age || "";
@@ -187,32 +193,70 @@ function openProfile() {
   $("profileModal").classList.remove("hidden");
 }
 
+$("editProfile").addEventListener("click", openProfile);
+
+
+// TUTUP FORM PROFIL
+
+$("closeModal").addEventListener("click", () => {
+  $("profileModal").classList.add("hidden");
+});
+
+$("profileModal").addEventListener("click", (event) => {
+  if (event.target === $("profileModal")) {
+    $("profileModal").classList.add("hidden");
+  }
+});
+
 
 // SIMPAN PROFIL
-$("profileForm").addEventListener("submit", function(event) {
+
+$("profileForm").addEventListener("submit", (event) => {
   event.preventDefault();
 
-  const age = Number($("age").value);
-  const height = Number($("height").value);
-  const weight = Number($("weight").value);
+  const name = $("name").value.trim();
+  const age = $("age").value;
+  const height = $("height").value;
+  const weight = $("weight").value;
 
-  if (age && (age < 1 || age > 120)) {
-    return showToast("Periksa kembali umur.");
+  if (!name) {
+    showToast("Masukkan nama terlebih dahulu.");
+    return;
   }
 
-  if (height < 0 || weight < 0) {
-    return showToast("Periksa kembali data profil.");
+  if (age && (Number(age) < 1 || Number(age) > 120)) {
+    showToast("Periksa kembali umur.");
+    return;
+  }
+
+  if (height && (Number(height) < 1 || Number(height) > 250)) {
+    showToast("Periksa kembali tinggi badan.");
+    return;
+  }
+
+  if (weight && (Number(weight) < 1 || Number(weight) > 500)) {
+    showToast("Periksa kembali berat badan.");
+    return;
   }
 
   profile = {
-    name: $("name").value.trim(),
-    age: $("age").value,
-    height: $("height").value,
-    weight: $("weight").value,
+    name: name,
+    age: age,
+    height: height,
+    weight: weight,
     goal: $("goal").value
   };
 
-  saveProfileData();
+  try {
+    localStorage.setItem(
+      "nutritrack_profile",
+      JSON.stringify(profile)
+    );
+  } catch {
+    showToast("Profil gagal disimpan.");
+    return;
+  }
+
   displayProfile();
 
   $("profileModal").classList.add("hidden");
@@ -221,136 +265,150 @@ $("profileForm").addEventListener("submit", function(event) {
 });
 
 
-// TOMBOL PROFIL
-$("editProfile").addEventListener("click", openProfile);
-
-$("closeModal").addEventListener("click", () => {
-  $("profileModal").classList.add("hidden");
-});
-
-$("profileModal").addEventListener("click", event => {
-  if (event.target === $("profileModal")) {
-    $("profileModal").classList.add("hidden");
-  }
-});
-
-
 // UPLOAD FOTO
+
 $("uploadButton").addEventListener("click", () => {
+  $("foodImage").removeAttribute("capture");
   $("foodImage").click();
 });
+
+
+// BUKA KAMERA
 
 $("cameraButton").addEventListener("click", () => {
   $("foodImage").setAttribute("capture", "environment");
   $("foodImage").click();
 });
 
-$("foodImage").addEventListener("change", function(event) {
+
+// TAMPILKAN FOTO
+
+$("foodImage").addEventListener("change", (event) => {
   const file = event.target.files[0];
 
   if (!file) return;
 
   if (!file.type.startsWith("image/")) {
-    return showToast("Pilih file gambar.");
+    showToast("File harus berupa gambar.");
+
+    event.target.value = "";
+    return;
   }
 
   if (file.size > 8 * 1024 * 1024) {
-    return showToast("Ukuran gambar maksimal 8 MB.");
+    showToast("Ukuran foto maksimal 8 MB.");
+
+    event.target.value = "";
+    return;
   }
 
-  if (selectedImage) {
-    URL.revokeObjectURL(selectedImage);
+  if (imageUrl) {
+    URL.revokeObjectURL(imageUrl);
   }
 
-  selectedImage = URL.createObjectURL(file);
+  imageUrl = URL.createObjectURL(file);
 
-  $("previewImage").src = selectedImage;
+  $("previewImage").src = imageUrl;
 
-  $("uploadContent").classList.add("hidden");
+  $("uploadEmpty").classList.add("hidden");
 
-  $("previewContainer").classList.remove("hidden");
+  $("previewWrap").classList.remove("hidden");
 
-  showToast("Foto berhasil dimasukkan!");
+  showToast("Foto berhasil diunggah!");
 });
 
 
 // HAPUS FOTO
-$("removeImage").addEventListener("click", () => {
-  if (selectedImage) {
-    URL.revokeObjectURL(selectedImage);
+
+function clearImage() {
+  if (imageUrl) {
+    URL.revokeObjectURL(imageUrl);
   }
 
-  selectedImage = null;
+  imageUrl = null;
 
   $("foodImage").value = "";
-  $("previewImage").src = "";
 
-  $("previewContainer").classList.add("hidden");
+  $("previewImage").removeAttribute("src");
 
-  $("uploadContent").classList.remove("hidden");
-});
+  $("previewWrap").classList.add("hidden");
+
+  $("uploadEmpty").classList.remove("hidden");
+}
+
+$("removeImage").addEventListener("click", clearImage);
 
 
-// HITUNG KALORI
+// SARAN NAMA MAKANAN
+
+$("foodSuggestions").innerHTML =
+  Object.values(foodDatabase)
+    .map(food => `<option value="${food.name}"></option>`)
+    .join("");
+
+
+// ANALISIS MAKANAN
+
 function analyzeFood() {
-  const inputName = $("foodName").value.trim().toLowerCase();
 
-  if (!inputName) {
-    showToast("Masukkan nama makanan terlebih dahulu!");
+  const foodName = $("foodName")
+    .value
+    .trim()
+    .toLowerCase();
+
+  const food = foodDatabase[foodName];
+
+  if (!foodName) {
+    showToast("Masukkan nama makanan!");
     $("foodName").focus();
     return;
   }
 
-  const food = foodDatabase[inputName];
-
   if (!food) {
-    showToast(
-      "Makanan belum ada dalam database contoh."
-    );
+    showToast("Makanan belum tersedia di database.");
     return;
   }
 
   const portion = Number($("portion").value);
 
-  currentResult = {
-    ...food,
-    portion: portion,
+  const calories = Math.round(
+    food.calories * portion
+  );
 
-    calories: Math.round(food.calories * portion),
+  const protein = Math.round(
+    food.protein * portion * 10
+  ) / 10;
 
-    protein: Math.round(food.protein * portion * 10) / 10,
+  const carbs = Math.round(
+    food.carbs * portion * 10
+  ) / 10;
 
-    carbs: Math.round(food.carbs * portion * 10) / 10,
-
-    fat: Math.round(food.fat * portion * 10) / 10
-  };
-
-  showResult();
-}
+  const fat = Math.round(
+    food.fat * portion * 10
+  ) / 10;
 
 
-// TAMPILKAN HASIL
-function showResult() {
-  const result = currentResult;
+  // TAMPILKAN HASIL
 
-  $("foodEmoji").textContent = result.emoji;
+  $("foodEmoji").textContent = food.emoji;
 
-  $("resultName").textContent = result.name;
+  $("resultName").textContent = food.name;
 
   $("resultPortion").textContent =
-    result.portion + " Porsi";
+    portion + " Porsi";
 
   $("resultCalories").textContent =
-    result.calories.toLocaleString("id-ID");
+    calories.toLocaleString("id-ID");
 
   $("resultProtein").textContent =
-    result.protein + " g";
+    protein + " g";
 
   $("resultCarbs").textContent =
-    result.carbs + " g";
+    carbs + " g";
 
   $("resultFat").textContent =
-    result.fat + " g";
+    fat + " g";
+
 
   $("resultSection").classList.remove("hidden");
 
@@ -362,24 +420,30 @@ function showResult() {
 
 
 // TOMBOL ANALISIS
-$("analyzeButton").addEventListener("click", analyzeFood);
 
-$("foodName").addEventListener("keydown", event => {
+$("analyzeButton").addEventListener(
+  "click",
+  analyzeFood
+);
+
+$("foodName").addEventListener("keydown", (event) => {
   if (event.key === "Enter") {
     analyzeFood();
   }
 });
 
 
-// SCAN ULANG
+// SCAN MAKANAN LAGI
+
 $("scanAgain").addEventListener("click", () => {
-  currentResult = null;
 
   $("resultSection").classList.add("hidden");
 
   $("foodName").value = "";
 
   $("portion").value = "1";
+
+  clearImage();
 
   window.scrollTo({
     top: 0,
@@ -388,17 +452,12 @@ $("scanAgain").addEventListener("click", () => {
 });
 
 
-// SARAN NAMA MAKANAN
-$("foodSuggestions").innerHTML =
-  Object.values(foodDatabase).map(food => {
-    return `<option value="${food.name}"></option>`;
-  }).join("");
-
-
 // JALANKAN WEBSITE
+
+loadProfile();
+
 displayProfile();
 
-// Jika profil belum diisi, buka pengaturan profil.
 if (!profile.name) {
   openProfile();
 }
